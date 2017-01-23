@@ -10,34 +10,146 @@
  * the screen is indexed (0,0).
  */
 class Screen {
+    static int start_screen, end_screen;
+    static boolean color;
+    static Array options;
 
     /** Initializes the Screen. */
     function void init() {
+        let start_screen = 16384;
+        let end_screen = 24608;
+        let color = true;
+        let options = Array.new(16);
+        let options[0] = 1;
+        let options[1] = 2;
+        let options[2] = 4;
+        let options[3] = 8;
+        let options[4] = 16;
+        let options[5] = 32;
+        let options[6] = 64;
+        let options[7] = 128;
+        let options[8] = 256;
+        let options[9] = 512;
+        let options[10] = 1024;
+        let options[11] = 2048;
+        let options[12] = 4096;
+        let options[13] = 8192;
+        let options[14] = 16384;
+        let options[15] = -32767;
+        return;
     }
 
     /** Erases the entire screen. */
     function void clearScreen() {
+        var int address;
+        let address = start_screen;
+        while (address < end_screen){
+            do Memory.poke(0);
+            let address = address + 1;
+        }
+        return;
     }
 
     /** Sets the current color, to be used for all subsequent drawXXX commands.
      *  Black is represented by true, white by false. */
     function void setColor(boolean b) {
+        let color = b;
+        return;
+    }
+
+    function int mod16(int num) {
+        return num & 15;
+    }
+
+    function int mult32(int x) {
+        var int counter;
+        let counter = 0;
+        while (counter < 5) {
+            let x = x + x;
+            let counter = counter + 1;
+        }
+        return x;
+    }
+
+    function int div16(int x) {
+        return x / 16;
     }
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
+        var int address, value, bit, current_value;
+        if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
+            do Sys.error(7);
+        }
+        let address = (Screen.mult32(y) + Screen.div16(x)) + start_screen;
+        let current_value = Memory.peek(address);
+        let bit = Screen.mod16(x);
+        let value = options[bit];
+        if (color) {
+            let value = value | current_value;
+        } else {
+            let value = (~value) & current_value;
+        }
+        do Memory.poke(address, value);
+        return;
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int temp, dx, dy, a, b, state;
+    /*    if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
+            do Sys.error(8);
+        }   */
+        let dx = x1 - x2;
+        let dy = y1 - y2;
+        let a = 0;
+        let b = 0;
+        let state = 0;
+        while (~(dx < a) & ~(dy < b)) {
+            do Screen.drawPixel(x1 + a, y1 + b);
+            if (state < 0) {
+                let a = a + 1;
+                let state = state + dy;
+            } else {
+                let b = b + 1;
+                let state = state - dx;
+            }
+            //do Screen.drawPixel(x1 + a, y1 + b);
+        }
+        return;
     }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
+            do Sys.error(8);
+        }
+        while (y1 < y2) {
+            do Screen.drawLine(x1, y1, x2, y1);
+            let y1 = y1 + 1;
+        }
+        return;
     }
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
+        var int dy, square_radius, root, y_dy, square_dy;
+    /*  if (x < 0 | x > 511 | y < 0 | y > 255) {
+            do Sys.error(12);
+        }
+        if ((x - r < 0 | x + r > 511) | (y - r < 0 | y + r > 255)) {
+            do Sys.error(13);
+        } */
+        let dy = -r;
+        let square_radius = r * r;
+        while (~(dy > r)) {
+            let y_dy = y + dy;
+            let square_dy = dy * dy;
+            let root = Math.sqrt(square_radius - square_dy);
+            do Screen.drawLine(x - root, y_dy, x + root, y_dy);
+            let dy = dy + 1;
+        }
+        return;
     }
 }
