@@ -13,6 +13,8 @@ class Screen {
     static int start_screen, end_screen;
     static boolean color;
     static Array options;
+    static int SCREEN_START, WORD_SIZE, ROW_SIZE;
+    static boolean WHITE, BLACK;
 
     /** Initializes the Screen. */
     function void init() {
@@ -35,7 +37,10 @@ class Screen {
         let options[12] = 4096;
         let options[13] = 8192;
         let options[14] = 16384;
-        let options[15] = -32767;
+        let options[15] = (0 - options[14]) - options[14];
+        let SCREEN_START = 16384;
+        let WHITE = false;
+        let BLACK = true;
         return;
     }
 
@@ -86,7 +91,7 @@ class Screen {
         let bit = Screen.mod16(x);
         let value = options[bit];
         if (color) {
-            let value = value | current_value;
+            let value = value | current_value;  
         } else {
             let value = (~value) & current_value;
         }
@@ -96,10 +101,10 @@ class Screen {
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
-        var int temp, dx, dy, a, b, state;
-    /*    if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
+        var int temp, dx, dy, a, b, state, y_move;
+        if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
             do Sys.error(8);
-        }   */
+        }   
         let dx = Math.abs(x1 - x2);
         if (dx = 0) {
             do Screen.drawYAxis(x1, y1, y2);
@@ -118,36 +123,25 @@ class Screen {
             let y1 = y2;
             let y2 = temp;
         }
-        let x1 = Math.min(x1, x2);
-        let y1 = Math.min(y1, y2);
+        if (y1 > y2) {
+            let y_move = -1;
+        } else {
+            let y_move = 1;
+        }
         let a = 0;
         let b = 0;
         let state = 0;
-        if (y1 < y2) {
-            while (~(dx < a) & ~(dy < b)) {
-                do Screen.drawPixel(x1 + a, y1 + b);
-                if (state < 0) {
-                    let a = a + 1;
-                    let state = state + dy;
-                } else {
-                    let b = b + 1;
-                    let state = state - dx;
-                }
+        while (~(dx < a) & ~(dy < b)) {
+            do Screen.drawPixel(x1 + a, y1 + b);
+            if (state < 0) {
+                let a = a + 1;
+                let state = state + dy;
+            } else {
+                let b = b + y_move;
+                let state = state - dx;
             }
-        } else { // todo fix
-            while (~(dx < a) & ~(dy < b)) {
-                do Screen.drawPixel(x1 + a, y1 + b);
-                if (state < 0) {
-                    let a = a + 1;
-                    let state = state - dy;
-                } else {
-                    let b = b + 1;
-                    let state = state + dx;
-                }
-                //do Screen.drawPixel(x1 + a, y1 + b);
-            }
-            }
-        return;
+        }
+        return; 
     }
 
     function void drawXAxis(int x1, int x2, int y) {
