@@ -100,21 +100,80 @@ class Screen {
     /*    if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
             do Sys.error(8);
         }   */
-        let dx = x1 - x2;
-        let dy = y1 - y2;
+        let dx = Math.abs(x1 - x2);
+        if (dx = 0) {
+            do Screen.drawYAxis(x1, y1, y2);
+            return;
+        }
+        let dy = Math.abs(y1 - y2);
+        if (dy = 0) {
+            do Screen.drawXAxis(x1, x2, y2);
+            return;
+        }
+        if (x1 > x2) {
+            let temp = x1;  // swap x
+            let x1 = x2;
+            let x2 = x1;
+            let temp = y1; // swap y
+            let y1 = y2;
+            let y2 = temp;
+        }
+        let x1 = Math.min(x1, x2);
+        let y1 = Math.min(y1, y2);
         let a = 0;
         let b = 0;
         let state = 0;
-        while (~(dx < a) & ~(dy < b)) {
-            do Screen.drawPixel(x1 + a, y1 + b);
-            if (state < 0) {
-                let a = a + 1;
-                let state = state + dy;
-            } else {
-                let b = b + 1;
-                let state = state - dx;
+        if (y1 < y2) {
+            while (~(dx < a) & ~(dy < b)) {
+                do Screen.drawPixel(x1 + a, y1 + b);
+                if (state < 0) {
+                    let a = a + 1;
+                    let state = state + dy;
+                } else {
+                    let b = b + 1;
+                    let state = state - dx;
+                }
             }
-            //do Screen.drawPixel(x1 + a, y1 + b);
+        } else { // todo fix
+            while (~(dx < a) & ~(dy < b)) {
+                do Screen.drawPixel(x1 + a, y1 + b);
+                if (state < 0) {
+                    let a = a + 1;
+                    let state = state - dy;
+                } else {
+                    let b = b + 1;
+                    let state = state + dx;
+                }
+                //do Screen.drawPixel(x1 + a, y1 + b);
+            }
+            }
+        return;
+    }
+
+    function void drawXAxis(int x1, int x2, int y) {
+        var int temp;
+        if (x1 > x2) {
+            let temp = x1;
+            let x1 = x2;
+            let x2 = temp;
+        }
+        while (~(x1 > x2)) {
+            do Screen.drawPixel(x1, y);
+            let x1 = x1 + 1;
+        }
+        return;
+    }
+
+    function void drawYAxis(int x, int y1, int y2) {
+        var int temp;
+        if (y1 > y2) {
+            let temp = y1;
+            let y1 = y2;
+            let y2 = temp;
+        }
+        while (~(y1 > y2)) {
+            do Screen.drawPixel(x, y1);
+            let y1 = y1 + 1;
         }
         return;
     }
