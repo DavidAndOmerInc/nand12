@@ -96,13 +96,16 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-        var int result, temp, index;
+        var int result, temp, index, square;
         if (x < 0) { do Sys.error(24); }
         let index = 7;
         let result = 0;
         while (index > -1) {
             let temp = result + two_powers[index];
-            if (~(temp * temp < x)) {let result = result + temp;}
+            let square = temp * temp;
+            if (~(square > x) & square > 0) {
+                let result = result + temp;
+            }
         }
         return result;
     }
