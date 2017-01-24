@@ -12,35 +12,30 @@
 class Screen {
     static int start_screen, end_screen;
     static boolean color;
-    static Array options;
-    static int SCREEN_START, WORD_SIZE, ROW_SIZE;
-    static boolean WHITE, BLACK;
+    static Array two_powers;
 
     /** Initializes the Screen. */
     function void init() {
         let start_screen = 16384;
         let end_screen = 24608;
         let color = true;
-        let options = Array.new(16);
-        let options[0] = 1;
-        let options[1] = 2;
-        let options[2] = 4;
-        let options[3] = 8;
-        let options[4] = 16;
-        let options[5] = 32;
-        let options[6] = 64;
-        let options[7] = 128;
-        let options[8] = 256;
-        let options[9] = 512;
-        let options[10] = 1024;
-        let options[11] = 2048;
-        let options[12] = 4096;
-        let options[13] = 8192;
-        let options[14] = 16384;
-        let options[15] = (0 - options[14]) - options[14];
-        let SCREEN_START = 16384;
-        let WHITE = false;
-        let BLACK = true;
+        let two_powers = Array.new(16);
+        let two_powers[0] = 1;
+        let two_powers[1] = 2;
+        let two_powers[2] = 4;
+        let two_powers[3] = 8;
+        let two_powers[4] = 16;
+        let two_powers[5] = 32;
+        let two_powers[6] = 64;
+        let two_powers[7] = 128;
+        let two_powers[8] = 256;
+        let two_powers[9] = 512;
+        let two_powers[10] = 1024;
+        let two_powers[11] = 2048;
+        let two_powers[12] = 4096;
+        let two_powers[13] = 8192;
+        let two_powers[14] = 16384;
+        let two_powers[15] = (0 - 16384) - 16384;
         return;
     }
 
@@ -89,7 +84,7 @@ class Screen {
         let address = (Screen.mult32(y) + Screen.div16(x)) + start_screen;
         let current_value = Memory.peek(address);
         let bit = Screen.mod16(x);
-        let value = options[bit];
+        let value = two_powers[bit];
         if (color) {
             let value = value | current_value;  
         } else {
@@ -107,7 +102,7 @@ class Screen {
         }   
         let dx = Math.abs(x1 - x2);
         if (dx = 0) {
-            do Screen.drawYAxis(x1, y1, y2);
+            do Screen.drawVerticalLine(x1, y1, y2);
             return;
         }
         let dy = Math.abs(y1 - y2);
@@ -158,7 +153,7 @@ class Screen {
         return;
     }
 
-    function void drawYAxis(int x, int y1, int y2) {
+    function void drawVerticalLine(int x, int y1, int y2) {
         var int temp;
         if (y1 > y2) {
             let temp = y1;

@@ -15,6 +15,15 @@ class Math {
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
+        if (x > 0) {
+            return x;
+        } else {
+            return -x;
+        }
+    }
+
+    function int bit(x, index) {
+        
     }
 
     /** Returns the product of x and y. 
@@ -31,6 +40,30 @@ class Math {
      *  the Jack expressions x/y and divide(x,y) return the same value.
      */
     function int divide(int x, int y) {
+        var int sign, result;
+        if (y = 0) {
+            do Sys.error(3);
+        }
+        if (x = 0) {
+            return 0;
+        }
+        if (x > 0) {
+            let sign = 1;
+        } else {
+            let sign = -1;
+        }
+        if (y < 0) {
+            let sign = -sign;
+        }
+
+
+
+
+        if (sign > 0) {
+            return result;
+        } else {
+            return -result;
+        }
     }
 
     /** Returns the integer part of the square root of x. */
@@ -39,9 +72,19 @@ class Math {
 
     /** Returns the greater number. */
     function int max(int a, int b) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
+        if (a < b) {
+            return a;
+        } else {
+            return b;
+        }
     }
 }
