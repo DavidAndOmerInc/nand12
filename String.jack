@@ -11,54 +11,120 @@
  * string-oriented operations.
  */
 class String {
+    field Array string;
+    field int max_length, current_length;
 
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
+        // if (maxLength < 0) {do Sys.error(14);}
+        let string = Array.new(maxLength);
+        let max_length = maxLength;
+        let current_length = 0;
+        return this;
     }
 
     /** Disposes this string. */
     method void dispose() {
+        do string.dispose();
+        return;
     }
 
     /** Returns the current length of this string. */
     method int length() {
+        return current_length;
     }
 
     /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
+        if (j > current_length - 1) {do Sys.error(14);}
+        return string[j];
     }
 
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
+        if (j > current_length - 1) {do Sys.error(14);} // todo check if needed
+        let string[j] = c;
+        return;
     }
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
+        if (current_length = max_length) {do Sys.error(17);}
+        let string[current_length] = c;
+        let current_length = current_length + 1;
+        return this;
     }
 
     /** Erases the last character from this string. */
     method void eraseLastChar() {
+        if (current_length = 0) {do Sys.error(18);}
+        let current_length = current_length - 1;
+        return;
     }
 
     /** Returns the integer value of this string, 
      *  until a non-digit character is detected. */
     method int intValue() {
+        var int num, index;
+        var boolean negitive;
+        let num = 0;
+        let index = 0;
+        if (string[0] = 45) {
+            let negitive = true;
+            let index = 1;
+        } else {
+            let negitive = false;
+        }
+        while (index < current_length) {
+            let num = (num * 10) + (string[index] - 48);
+            let index = index + 1;
+        }
+        if (negitive) {return -num;}
+        return num;
     }
 
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
+        var int index, temp;
+        var Array temp_string;
+        let current_length = 0;
+        if (val = 0) {
+            do appendChar(0);
+            return;
+        }
+        if (val < 0) {
+            do appendChar(45);
+            let val = -val;
+        }
+        let index = 0;
+        let temp_string = Array.new(5);
+        while (val > 0) {
+            let temp = val / 10;
+            let temp_string[index] = val - (temp * 10) + 48;
+            let index = index + 1;
+            let val = temp;
+        }
+        let index = index - 1;
+        while (~(index < 0)) {
+            do appendChar(temp[index]);
+            let index = index - 1;
+        }
+        return;
     }
 
     /** Returns the new line character. */
     function char newLine() {
+        return 128;
     }
 
     /** Returns the backspace character. */
     function char backSpace() {
+        return 129;
     }
 
     /** Returns the double quote (") character. */
     function char doubleQuote() {
+        return 34;
     }
 }

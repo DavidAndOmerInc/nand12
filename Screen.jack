@@ -129,9 +129,10 @@ class Screen {
             let x2 = temp;
         }
         let length = 16 - Math.mod16(x1);
-        while (~(x1 > x2) &  ~(Math.mod16(x1) = 0)) {
+        while (~(x1 > x2) & length > 0) {
             do Screen.drawPixel(x1, y);
             let x1 = x1 + 1;
+            let length = length - 1;
         }
         let address = (Math.mult32(y) + Math.div2n(x1, 4)) + start_screen;
         while(~(x2 - x1 < 16)) {
