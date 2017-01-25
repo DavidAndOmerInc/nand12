@@ -63,7 +63,7 @@ class Screen {
         if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
             do Sys.error(7);
         }
-        let address = (Math.mult32(y) + Math.div2n(x, 16)) + start_screen;
+        let address = (Math.mult32(y) + Math.div2n(x, 4)) + start_screen;
         let current_value = Memory.peek(address);
         let bit = Math.mod16(x);
         let value = two_powers[bit];
@@ -122,11 +122,22 @@ class Screen {
     }
 
     function void drawHorizontalLine(int x1, int x2, int y) {
-        var int temp;
+        var int temp, address, length;
         if (x1 > x2) {
             let temp = x1;
             let x1 = x2;
             let x2 = temp;
+        }
+        let length = 16 - Math.mod16(x1);
+        while (~(x1 > x2) &  ~(Math.mod16(x1) = 0)) {
+            do Screen.drawPixel(x1, y);
+            let x1 = x1 + 1;
+        }
+        let address = (Math.mult32(y) + Math.div2n(x1, 4)) + start_screen;
+        while(~(x2 - x1 < 16)) {
+            do Memory.poke(address, color);
+            let address = address + 1;
+            let x1 = x1 + 16;
         }
         while (~(x1 > x2)) {
             do Screen.drawPixel(x1, y);
@@ -156,7 +167,7 @@ class Screen {
             do Sys.error(8);
         }
         while (y1 < y2) {
-            do Screen.drawLine(x1, y1, x2, y1);
+            do Screen.drawHorizontalLine(x1, x2, y1);
             let y1 = y1 + 1;
         }
         return;
@@ -165,19 +176,19 @@ class Screen {
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
         var int dy, square_radius, root, y_dy, square_dy;
-    /*  if (x < 0 | x > 511 | y < 0 | y > 255) {
+        if (x < 0 | x > 511 | y < 0 | y > 255) {
             do Sys.error(12);
         }
         if ((x - r < 0 | x + r > 511) | (y - r < 0 | y + r > 255)) {
             do Sys.error(13);
-        } */
+        } 
         let dy = -r;
         let square_radius = r * r;
         while (~(dy > r)) {
             let y_dy = y + dy;
             let square_dy = dy * dy;
             let root = Math.sqrt(square_radius - square_dy);
-            do Screen.drawLine(x - root, y_dy, x + root, y_dy);
+            do Screen.drawHorizontalLine(x - root, x + root, y_dy);
             let dy = dy + 1;
         }
         return;
