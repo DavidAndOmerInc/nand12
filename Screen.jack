@@ -35,7 +35,7 @@ class Screen {
         let two_powers[12] = 4096;
         let two_powers[13] = 8192;
         let two_powers[14] = 16384;
-        let two_powers[15] = (0 - 16384) - 16384;
+        let two_powers[15] =  16384 + 16384;
         return;
     }
 
@@ -44,7 +44,7 @@ class Screen {
         var int address;
         let address = start_screen;
         while (address < end_screen){
-            do Memory.poke(0);
+            do Memory.poke(address, 0);
             let address = address + 1;
         }
         return;

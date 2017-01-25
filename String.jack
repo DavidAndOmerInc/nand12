@@ -17,16 +17,20 @@ class String {
     /** constructs a new empty string with a maximum length of maxLength
      *  and initial length of 0. */
     constructor String new(int maxLength) {
-        // if (maxLength < 0) {do Sys.error(14);}
-        let string = Array.new(maxLength);
+        if (maxLength < 0) {do Sys.error(14);}
+        //let max_length = Math.max(1, maxLength);
         let max_length = maxLength;
         let current_length = 0;
+        if (max_length = 0) {return this;}
+        let string = Array.new(max_length);
         return this;
     }
 
     /** Disposes this string. */
     method void dispose() {
-        do string.dispose();
+        if (max_length > 0) {
+            do string.dispose();
+        }
         return;
     }
 
@@ -37,20 +41,23 @@ class String {
 
     /** Returns the character at the j-th location of this string. */
     method char charAt(int j) {
-        if (j > current_length - 1) {do Sys.error(14);}
+        if (j > current_length - 1 & j < 0) {
+            do Sys.error(16);}
         return string[j];
     }
 
     /** Sets the character at the j-th location of this string to c. */
     method void setCharAt(int j, char c) {
-        if (j > current_length - 1) {do Sys.error(14);} // todo check if needed
+        if (j > current_length) {do Sys.error(14);} // todo check if needed
         let string[j] = c;
         return;
     }
 
     /** Appends c to this string's end and returns this string. */
     method String appendChar(char c) {
-        if (current_length = max_length) {do Sys.error(17);}
+        if (current_length > max_length) {
+            do Sys.error(17);
+        }
         let string[current_length] = c;
         let current_length = current_length + 1;
         return this;
@@ -87,7 +94,7 @@ class String {
     /** Sets this string to hold a representation of the given value. */
     method void setInt(int val) {
         var int index, temp;
-        var Array temp_string;
+        var Array reverse_string;
         let current_length = 0;
         if (val = 0) {
             do appendChar(0);
@@ -98,18 +105,19 @@ class String {
             let val = -val;
         }
         let index = 0;
-        let temp_string = Array.new(5);
+        let reverse_string = Array.new(5);
         while (val > 0) {
             let temp = val / 10;
-            let temp_string[index] = val - (temp * 10) + 48;
+            let reverse_string[index] = val - (temp * 10) + 48;
             let index = index + 1;
             let val = temp;
         }
         let index = index - 1;
         while (~(index < 0)) {
-            do appendChar(temp[index]);
+            do appendChar(reverse_string[index]);
             let index = index - 1;
         }
+        do reverse_string.dispose();
         return;
     }
 
