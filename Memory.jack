@@ -10,34 +10,138 @@
  */ 
 class Memory {
 
-	static Array memory;
-	static Array frees;
-	
-    /** Initializes the class. */
+	class Memory {
+
+	static int MSTART;
+	static int HSTART, HEND;
+	static int NEXT, SIZE, USED, STRUCT_SIZE;
+	static int free_list;
+
+    /** Initializes memory parameters. */
     function void init() {
-		let memory = 0;
-		let free = 2048;
+		var int first_block, last_block;
+		let HSTART = 2048;
+		let HEND = 16383;
+		let STRUCT_SIZE = 3;
+		let SIZE = -3;
+		let USED = -2;
+		let NEXT = -1;
+		let first_block = HSTART + STRUCT_SIZE;
+		let first_block[SIZE] = 0;
+		let first_block[USED] = true;
+		let last_block = HEND + 1;
+		let last_block[SIZE] = 0;
+		let last_block[USED] = true;
+		let last_block[NEXT] = 0;
+
+		let free_list = first_block + STRUCT_SIZE;
+		let free_list[SIZE] = last_block - free_list - STRUCT_SIZE;
+		let free_list[USED] = false;
+		let free_list[NEXT] = last_block;
+		let first_block[NEXT] = free_list;
+		let free_list = first_block;
 		return;
     }
 
-    /** Returns the RAM value at the given address. */
+    /** Returns the value of the main memory at this address. */
     function int peek(int address) {
-		return memory[address];
+		return MSTART[address];
     }
 
-    /** Sets the RAM value at the given address to the given value. */
+    /** Sets the value of the main memory at this address
+     *  to the given value. */
     function void poke(int address, int value) {
-		let memory[address] = value;
+		let MSTART[address] = value;
+		return;
     }
 
-    /** Finds an available RAM block of the given size and returns
-     *  a reference to its base address. */
+    /** finds and allocates from the heap a memory block of the 
+     *  specified size and returns a reference to its base address. */
     function int alloc(int size) {
-
+		var int cur_blk, nxt, newblk, curr_blk_size, is_used, match;
+		var boolean is_fnd;
+		let is_fnd = false;
+		let cur_blk = free_list;
+		let match = 0;
+		while (~(is_fnd | (cur_blk = 0))) {
+			let curr_blk_size = cur_blk[SIZE];
+			let is_used = cur_blk[USED];
+			if (~(is_used | (curr_blk_size < size))) {
+				let is_fnd = true;
+				let match = cur_blk;
+				let match[USED] = true;
+				let nxt = cur_blk[NEXT];
+				let newblk = cur_blk + size + STRUCT_SIZE;
+				if (newblk + STRUCT_SIZE < nxt) { // split block
+					let newblk[SIZE] = nxt - newblk - STRUCT_SIZE;
+					let newblk[USED] = false;
+					let newblk[NEXT] = nxt;
+					let match[NEXT] = newblk;
+					let match[SIZE] = newblk - match - STRUCT_SIZE;
+				}
+			}
+			let cur_blk = cur_blk[NEXT];
+		}
+		return match;
     }
 
     /** De-allocates the given object and frees its space. */
-    function void deAlloc(Array object) {
-        
-    }    
+    function void deAlloc(int object) {
+		var int prv_blk, cur_blk, nxt, afternxt, tmp_ptr;
+		let cur_blk = free_list;
+		let prv_blk = Memory.__prev_block(object);
+		if (prv_blk = 0) {
+			return;
+		}
+		let cur_blk = prv_blk[NEXT];
+		if (cur_blk = 0) {
+			return;
+		}
+		let nxt = cur_blk[NEXT];
+		if (nxt = 0) {
+			return;
+		}
+		let cur_blk[USED] = false; // DeAlloc
+		let tmp_ptr = cur_blk; // empty block
+		while (tmp_ptr + STRUCT_SIZE < nxt) {
+			let tmp_ptr[0] = 0;
+			let tmp_ptr = tmp_ptr + 1;
+		}
+		if (~(nxt[USED])) { // Defraging
+			let afternxt = nxt[NEXT];
+			let cur_blk[SIZE] = afternxt - cur_blk - STRUCT_SIZE;
+			let cur_blk[NEXT] = afternxt; // empty block
+			let nxt[SIZE] = 0;
+			let nxt[USED] = 0;
+			let nxt[NEXT] = 0; // next handle
+			let nxt = afternxt;
+		}
+		if (~(prev_block[USED])) {
+			let prv_blk[SIZE] = nxt - prv_blk - STRUCT_SIZE;
+			let prv_blk[NEXT] = nxt;  // clear block metadata
+			let cur_blk[SIZE] = 0;
+			let cur_blk[USED] = 0;
+			let cur_blk[NEXT] = 0;
+		}
+
+		return;
+    }
+
+	function int __prev_block(int object) {
+		var int cur_blk;
+		var boolean is_fnd;
+		let cur_blk = free_list;
+		let is_fnd = false;
+		while (~(is_fnd | (cur_blk = 0) | (cur_blk > object))) {
+			if (cur_blk[NEXT] = object) {
+				let is_fnd = true;
+			} else {
+				let cur_blk = cur_blk[NEXT];
+			}
+		}
+		if (~is_fnd) {
+			return 0;
+		}
+		return cur_blk;
+	} 
 }
