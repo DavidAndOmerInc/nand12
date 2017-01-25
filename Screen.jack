@@ -57,33 +57,15 @@ class Screen {
         return;
     }
 
-    function int mod16(int num) {
-        return num & 15;
-    }
-
-    function int mult32(int x) {
-        var int counter;
-        let counter = 0;
-        while (counter < 5) {
-            let x = x + x;
-            let counter = counter + 1;
-        }
-        return x;
-    }
-
-    function int div16(int x) {
-        return x / 16;
-    }
-
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
         var int address, value, bit, current_value;
         if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
             do Sys.error(7);
         }
-        let address = (Screen.mult32(y) + Screen.div16(x)) + start_screen;
+        let address = (Math.mult32(y) + Math.div2n(x, 16)) + start_screen;
         let current_value = Memory.peek(address);
-        let bit = Screen.mod16(x);
+        let bit = Math.mod16(x);
         let value = two_powers[bit];
         if (color) {
             let value = value | current_value;  
@@ -107,7 +89,7 @@ class Screen {
         }
         let dy = Math.abs(y1 - y2);
         if (dy = 0) {
-            do Screen.drawXAxis(x1, x2, y2);
+            do Screen.drawHorizontalLine(x1, x2, y2);
             return;
         }
         if (x1 > x2) {
@@ -139,7 +121,7 @@ class Screen {
         return; 
     }
 
-    function void drawXAxis(int x1, int x2, int y) {
+    function void drawHorizontalLine(int x1, int x2, int y) {
         var int temp;
         if (x1 > x2) {
             let temp = x1;
