@@ -18,8 +18,8 @@ class Array {
 		if(size > 0){
 			return Memory.alloc(size);
 		}
-		call Sys.error(2);
-		
+		do Sys.error(2);
+		return null;
     }
 
     /** Disposes this array. */

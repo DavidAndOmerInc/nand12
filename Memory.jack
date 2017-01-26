@@ -10,8 +10,6 @@
  */ 
 class Memory {
 
-	class Memory {
-
 	static int MSTART;
 	static int HSTART, HEND;
 	static int NEXT, SIZE, USED, STRUCT_SIZE;
@@ -116,7 +114,7 @@ class Memory {
 			let nxt[NEXT] = 0; // next handle
 			let nxt = afternxt;
 		}
-		if (~(prev_block[USED])) {
+		if (~(prv_blk[USED])) {
 			let prv_blk[SIZE] = nxt - prv_blk - STRUCT_SIZE;
 			let prv_blk[NEXT] = nxt;  // clear block metadata
 			let cur_blk[SIZE] = 0;
