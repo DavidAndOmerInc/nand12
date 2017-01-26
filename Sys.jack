@@ -32,7 +32,7 @@ class Sys {
         if (duration < 0) {do Sys.error(1);}
         while (duration > 0) {
             let iteration = 0;
-            while (iteration < 55) {
+            while (iteration < 50) {
                 let iteration = iteration + 1;
             }
             let duration = duration - 1;
