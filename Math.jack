@@ -37,14 +37,54 @@ class Math {
     function int abs(int x) {
         if (x > 0) {
             return x;
-        } else {
-            return -x;
-        }
+        } 
+        return -x;
     }
 
     function int bit(int x, int index) {
-        return 0;
+        if ((x & two_powers[index]) = 0) {
+            return 0;
+        } 
+        return 1;
+    }
 
+    function int div2n (int x, int n) {
+        var int test, set, y;
+        var boolean positive;
+        if (x = 0) {
+            return 0;
+        } else {
+            if (x > 0) {
+                let positive = true;
+            } else {
+                let positive = false;
+                let x = -x;
+            }
+        }
+        let set = 1;
+        let test = two_powers[n];
+        while (~(test = 0)) {
+            if ((x & test) = test) {
+                let y = y | set;
+            }
+            let test = test + test;
+            let set = set + set;
+        }
+        return y;
+    }
+
+    function int mod16(int num) {
+        return num & 15;
+    }
+
+    function int mult32(int x) {
+        var int counter;
+        let counter = 0;
+        while (counter < 5) {
+            let x = x + x;
+            let counter = counter + 1;
+        }
+        return x;
     }
 
     /** Returns the product of x and y. 
@@ -53,7 +93,17 @@ class Math {
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
-        return 0;
+        var int shifted_x, index, sum;
+        let shifted_x = x;
+        let sum = 0;
+        while (index < 16) {
+            if (Math.bit(y, index) = 1) {
+                let sum = sum + shifted_x;
+            }
+            let shifted_x = shifted_x + shifted_x;
+            let index = index + 1;
+        }
+        return sum;
     }
 
     /** Returns the integer part of x/y.
@@ -80,6 +130,7 @@ class Math {
         if (x = 0 | y > x) {
             return 0;
         }
+        if (y + y < 0) {do Sys.error(3);}
         let q = Math.divide(x, y + y);
         let two_q = q + q;
         if (y * (two_q + 1) > x) {
@@ -89,9 +140,8 @@ class Math {
         }
         if (positive) {
             return result;
-        } else {
-            return -result;
         }
+        return -result;
     }   
 
     /** Returns the integer part of the square root of x. */
@@ -104,8 +154,9 @@ class Math {
             let temp = result + two_powers[index];
             let square = temp * temp;
             if (~(square > x) & square > 0) {
-                let result = result + temp;
+                let result = temp;
             }
+            let index = index - 1;
         }
         return result;
     }
@@ -114,17 +165,15 @@ class Math {
     function int max(int a, int b) {
         if (a > b) {
             return a;
-        } else {
-            return b;
-        }
+        } 
+        return b;
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
         if (a < b) {
             return a;
-        } else {
-            return b;
-        }
+        } 
+        return b;
     }
 }

@@ -35,7 +35,7 @@ class Screen {
         let two_powers[12] = 4096;
         let two_powers[13] = 8192;
         let two_powers[14] = 16384;
-        let two_powers[15] = (0 - 16384) - 16384;
+        let two_powers[15] =  16384 + 16384;
         return;
     }
 
@@ -44,7 +44,7 @@ class Screen {
         var int address;
         let address = start_screen;
         while (address < end_screen){
-            do Memory.poke(0);
+            do Memory.poke(address, 0);
             let address = address + 1;
         }
         return;
@@ -57,33 +57,15 @@ class Screen {
         return;
     }
 
-    function int mod16(int num) {
-        return num & 15;
-    }
-
-    function int mult32(int x) {
-        var int counter;
-        let counter = 0;
-        while (counter < 5) {
-            let x = x + x;
-            let counter = counter + 1;
-        }
-        return x;
-    }
-
-    function int div16(int x) {
-        return x / 16;
-    }
-
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
         var int address, value, bit, current_value;
         if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
             do Sys.error(7);
         }
-        let address = (Screen.mult32(y) + Screen.div16(x)) + start_screen;
+        let address = (Math.mult32(y) + Math.div2n(x, 4)) + start_screen;
         let current_value = Memory.peek(address);
-        let bit = Screen.mod16(x);
+        let bit = Math.mod16(x);
         let value = two_powers[bit];
         if (color) {
             let value = value | current_value;  
@@ -107,7 +89,7 @@ class Screen {
         }
         let dy = Math.abs(y1 - y2);
         if (dy = 0) {
-            do Screen.drawXAxis(x1, x2, y2);
+            do Screen.drawHorizontalLine(x1, x2, y2);
             return;
         }
         if (x1 > x2) {
@@ -139,12 +121,24 @@ class Screen {
         return; 
     }
 
-    function void drawXAxis(int x1, int x2, int y) {
-        var int temp;
+    function void drawHorizontalLine(int x1, int x2, int y) {
+        var int temp, address, length;
         if (x1 > x2) {
             let temp = x1;
             let x1 = x2;
             let x2 = temp;
+        }
+        let length = 16 - Math.mod16(x1);
+        while (~(x1 > x2) & length > 0) {
+            do Screen.drawPixel(x1, y);
+            let x1 = x1 + 1;
+            let length = length - 1;
+        }
+        let address = (Math.mult32(y) + Math.div2n(x1, 4)) + start_screen;
+        while(~(x2 - x1 < 16)) {
+            do Memory.poke(address, color);
+            let address = address + 1;
+            let x1 = x1 + 16;
         }
         while (~(x1 > x2)) {
             do Screen.drawPixel(x1, y);
@@ -174,7 +168,7 @@ class Screen {
             do Sys.error(8);
         }
         while (y1 < y2) {
-            do Screen.drawLine(x1, y1, x2, y1);
+            do Screen.drawHorizontalLine(x1, x2, y1);
             let y1 = y1 + 1;
         }
         return;
@@ -183,19 +177,19 @@ class Screen {
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
         var int dy, square_radius, root, y_dy, square_dy;
-    /*  if (x < 0 | x > 511 | y < 0 | y > 255) {
+        if (x < 0 | x > 511 | y < 0 | y > 255) {
             do Sys.error(12);
         }
         if ((x - r < 0 | x + r > 511) | (y - r < 0 | y + r > 255)) {
             do Sys.error(13);
-        } */
+        } 
         let dy = -r;
         let square_radius = r * r;
         while (~(dy > r)) {
             let y_dy = y + dy;
             let square_dy = dy * dy;
             let root = Math.sqrt(square_radius - square_dy);
-            do Screen.drawLine(x - root, y_dy, x + root, y_dy);
+            do Screen.drawHorizontalLine(x - root, x + root, y_dy);
             let dy = dy + 1;
         }
         return;
