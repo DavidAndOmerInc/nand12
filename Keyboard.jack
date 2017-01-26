@@ -68,8 +68,7 @@ class Keyboard {
     function String readLine(String message) {
 		var String line;
         var char ch;
-        do Output.printString(message);
-        
+        do Output.printString(message);        
         let line = String.new(100);
         let ch = Keyboard.readChar();
         while (~(ch = String.newLine())) {
