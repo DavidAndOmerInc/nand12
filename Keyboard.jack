@@ -52,6 +52,8 @@ class Keyboard {
 		while (~(Keyboard.keyPressed() = 0)) {}
         if (currKey = String.backSpace()) {
             do Output.backSpace();
+			do Output.printChar(32);
+			do Output.backSpace();
         } else {
             do Output.printChar(currKey);
         }
