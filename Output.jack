@@ -223,6 +223,31 @@ class Output {
 		}
 		return;
     }
+	/** delete last char */
+	function void delChar() {
+		var Array mapping;
+		var int adr, msk, im, i;
+		let adr = (x/2) + ((32*11)*y);
+		let msk = x & 1;
+		let i = 0;
+		while(i<11){
+			let im = 255;
+			if(msk = 0){
+				let im = im*256;
+			}
+			let screen[adr] = screen[adr] & im;
+			let adr = adr + 32; // iterating
+			let i = i + 1;
+		}
+		
+		if(x=63){ // End of line
+			do Output.println();
+		}
+		else{
+			let x = x+1;
+		}
+		return;
+    }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
