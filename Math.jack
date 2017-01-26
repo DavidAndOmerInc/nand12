@@ -29,8 +29,12 @@ class Math {
         let two_powers[12] = 4096;
         let two_powers[13] = 8192;
         let two_powers[14] = 16384;
-        let two_powers[15] = (0 - 16384) - 16384;
+        let two_powers[15] =  16384 + 16384;
         return;
+    }
+
+    function int get2n(int n) {
+        return two_powers[n];
     }
 
     /** Returns the absolute value of x. */
@@ -42,7 +46,7 @@ class Math {
     }
 
     function int bit(int x, int index) {
-        if ((x & two_powers[index]) = 0) {
+        if ((x & Math.get2n(index)) = 0) {
             return 0;
         } 
         return 1;
@@ -62,7 +66,7 @@ class Math {
             }
         }
         let set = 1;
-        let test = two_powers[n];
+        let test = Math.get2n(n);
         while (~(test = 0)) {
             if ((x & test) = test) {
                 let y = y | set;
@@ -73,14 +77,14 @@ class Math {
         return y;
     }
 
-    function int mod16(int num) {
-        return num & 15;
+    function int mod2n(int num, int n) {
+        return num & (Math.get2n(n) - 1);
     }
 
-    function int mult32(int x) {
+    function int mult2n(int x, int n) {
         var int counter;
         let counter = 0;
-        while (counter < 5) {
+        while (counter < n) {
             let x = x + x;
             let counter = counter + 1;
         }
@@ -130,19 +134,26 @@ class Math {
         if (x = 0 | y > x) {
             return 0;
         }
-        if (y + y < 0) {do Sys.error(3);}
-        let q = Math.divide(x, y + y);
-        let two_q = q + q;
-        if (y * (two_q + 1) > x) {
-            let result = two_q;
-        } else {
-            let result = two_q + 1;
-        }
+        let result = Math.divide_positive(x, y);
         if (positive) {
             return result;
         }
         return -result;
-    }   
+    }
+
+    function int divide_positive(int x, int y) {
+        var int result, q, two_q;
+        if (y > x | y < 0) {
+            return 0;
+        }
+        let q = Math.divide_positive(x, y + y);
+        let two_q = q + q;
+        if (x - (two_q * y) < y) {
+            return two_q;
+        } else {
+            return two_q + 1;
+        }
+    }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
@@ -151,7 +162,7 @@ class Math {
         let index = 7;
         let result = 0;
         while (index > -1) {
-            let temp = result + two_powers[index];
+            let temp = result + Math.get2n(index);
             let square = temp * temp;
             if (~(square > x) & square > 0) {
                 let result = temp;

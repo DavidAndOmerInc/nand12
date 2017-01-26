@@ -12,30 +12,12 @@
 class Screen {
     static int start_screen, end_screen;
     static boolean color;
-    static Array two_powers;
 
     /** Initializes the Screen. */
     function void init() {
         let start_screen = 16384;
         let end_screen = 24608;
         let color = true;
-        let two_powers = Array.new(16);
-        let two_powers[0] = 1;
-        let two_powers[1] = 2;
-        let two_powers[2] = 4;
-        let two_powers[3] = 8;
-        let two_powers[4] = 16;
-        let two_powers[5] = 32;
-        let two_powers[6] = 64;
-        let two_powers[7] = 128;
-        let two_powers[8] = 256;
-        let two_powers[9] = 512;
-        let two_powers[10] = 1024;
-        let two_powers[11] = 2048;
-        let two_powers[12] = 4096;
-        let two_powers[13] = 8192;
-        let two_powers[14] = 16384;
-        let two_powers[15] =  16384 + 16384;
         return;
     }
 
@@ -63,10 +45,10 @@ class Screen {
         if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
             do Sys.error(7);
         }
-        let address = (Math.mult32(y) + Math.div2n(x, 4)) + start_screen;
+        let address = (Math.mult2n(y, 5) + Math.div2n(x, 4)) + start_screen;
         let current_value = Memory.peek(address);
-        let bit = Math.mod16(x);
-        let value = two_powers[bit];
+        let bit = Math.mod2n(x, 4);
+        let value = Math.get2n(bit);
         if (color) {
             let value = value | current_value;  
         } else {
@@ -128,13 +110,13 @@ class Screen {
             let x1 = x2;
             let x2 = temp;
         }
-        let length = 16 - Math.mod16(x1);
+        let length = 16 - Math.mod2n(x1, 4);
         while (~(x1 > x2) & length > 0) {
             do Screen.drawPixel(x1, y);
             let x1 = x1 + 1;
             let length = length - 1;
         }
-        let address = (Math.mult32(y) + Math.div2n(x1, 4)) + start_screen;
+        let address = (Math.mult2n(y, 5) + Math.div2n(x1, 4)) + start_screen;
         while(~(x2 - x1 < 16)) {
             do Memory.poke(address, color);
             let address = address + 1;
