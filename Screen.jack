@@ -16,7 +16,7 @@ class Screen {
     /** Initializes the Screen. */
     function void init() {
         let start_screen = 16384;
-        let end_screen = 24608;
+        let end_screen = 24576;
         let color = true;
         return;
     }
