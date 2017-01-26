@@ -50,7 +50,11 @@ class Keyboard {
 		while (Keyboard.keyPressed() = 0) {}
 		let currKey = Keyboard.keyPressed();
 		while (~(Keyboard.keyPressed() = 0)) {}
-		do Output.printChar(currKey);
+        if (currKey = String.backSpace()) {
+            do Output.backSpace();
+        } else {
+            do Output.printChar(currKey);
+        }
 		return currKey;
     }
 
@@ -69,6 +73,7 @@ class Keyboard {
         while (~(ch = String.newLine())) {
             if (ch = String.backSpace()) {
                 do line.eraseLastChar();
+               // do Output.backSpace();
             }
             else {
                 do line.appendChar(ch);
