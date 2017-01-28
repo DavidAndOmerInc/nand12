@@ -126,14 +126,21 @@ class Screen {
     }
 
     function void drawVerticalLine(int x, int y1, int y2) {
-        var int temp;
+        var int temp, value, address;
         if (y1 > y2) {
             let temp = y1;
             let y1 = y2;
             let y2 = temp;
         }
+        let address = Math.mult2n(y1, 5) + Math.div2n(x, 4) + start_screen;
+        let value = Math.get2n(Math.mod2n(x, 4));
         while (~(y1 > y2)) {
-            do Screen.drawPixel(x, y1);
+            if (color) {
+                do Memory.poke(address, Memory.peek(address) | value);
+            } else {
+                do Memory.poke(address, Memory.peek(address) & (~value));
+            }
+            let address = address + 32;
             let y1 = y1 + 1;
         }
         return;
