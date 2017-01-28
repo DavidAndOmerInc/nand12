@@ -157,7 +157,7 @@ class Screen {
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
-        var int dy, square_radius, root, y_dy, square_dy, address, x_minus_r2, x_plus_r2;
+        var int dy, square_radius, root, y_dy, square_dy, address, x_minus_r2, x_plus_r2, distance;
         if (x < 0 | x > 511 | y < 0 | y > 255) {
             do Sys.error(12);
         }
@@ -168,6 +168,7 @@ class Screen {
         let square_radius = r * r;
         let address = Math.mult2n(y, 5) + Math.div2n((x - r), 4) + start_screen;
         do Screen.drawHorizontalLine(x - r, x + r, y, address);
+        let distance = 64;
         while (~(dy > r)) {
             let y_dy = y + dy;
             let square_dy = dy * dy;
@@ -177,7 +178,8 @@ class Screen {
             let address = Math.mult2n(y_dy, 5) + Math.div2n(x_minus_r2, 4) + start_screen;
             do Screen.drawHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
             let y_dy = y - dy;
-            let address = Math.mult2n(y_dy, 5) + Math.div2n(x_minus_r2, 4) + start_screen;
+            let address = address - distance;
+            let distance = distance + 64;
             do Screen.drawHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
             let dy = dy + 1;
         }
