@@ -166,7 +166,7 @@ class Screen {
             do Sys.error(8);
         }
         let address = Math.mult2n(y1, 5) + Math.div2n(x1, 4) + start_screen;
-        while (y1 < y2) {
+        while (~(y1 > y2)) {
             do Screen.drawHorizontalLine(x1, x2, y1, address);
             let y1 = y1 + 1;
             let address = address + 32;
