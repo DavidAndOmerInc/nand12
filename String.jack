@@ -31,6 +31,7 @@ class String {
         if (max_length > 0) {
             do string.dispose();
         }
+        do Memory.deAlloc(this);
         return;
     }
 
@@ -97,8 +98,14 @@ class String {
         var Array reverse_string;
         let current_length = 0;
         if (val = 0) {
-            do appendChar(0);
+            do appendChar(48);
+            let current_length = 1;
             return;
+        }
+        if (max_length < 6) {
+            do string.dispose();
+            let max_length = 6;
+            let string = Array.new(max_length);
         }
         if (val < 0) {
             do appendChar(45);

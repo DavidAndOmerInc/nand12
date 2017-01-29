@@ -108,7 +108,7 @@ class Screen {
         var int temp, address, length;
         let length = 16 - Math.mod2n(x1, 4);
         let temp = 0;
-        while (~(x1 > x2) & length > 0) {
+        while (~(x1 > x2) & ~(length < 0) {
             let temp = temp + Math.get2n(Math.mod2n(x1, 4));
             let x1 = x1 + 1;
             let length = length - 1;
