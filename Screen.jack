@@ -107,10 +107,16 @@ class Screen {
     function void drawHorizontalLine(int x1, int x2, int y, int address) {
         var int temp, address, length;
         let length = 16 - Math.mod2n(x1, 4);
+        let temp = 0;
         while (~(x1 > x2) & length > 0) {
-            do Screen.drawPixel(x1, y);
+            let temp = temp + Math.get2n(Math.mod2n(x1, 4));
             let x1 = x1 + 1;
             let length = length - 1;
+        }
+        if (color) {
+            do Memory.poke(address, Memory.peek(address) | temp);
+        } else {
+            do Memory.poke(address, Memory.peek(address) & (~temp));
         }
         let address = address + 1;
         while(~(x2 - x1 < 16)) {
@@ -118,9 +124,15 @@ class Screen {
             let address = address + 1;
             let x1 = x1 + 16;
         }
+        let temp = 0;
         while (~(x1 > x2)) {
-            do Screen.drawPixel(x1, y);
+            let temp = temp + Math.get2n(Math.mod2n(x1, 4));
             let x1 = x1 + 1;
+        }
+        if (color) {
+            do Memory.poke(address, Memory.peek(address) | temp);
+        } else {
+            do Memory.poke(address, Memory.peek(address) & (~temp));
         }
         return;
     }
