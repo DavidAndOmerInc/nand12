@@ -291,11 +291,11 @@ class Output {
     }
 	/** delete the whole line content */
 	function void deleteLine() {
-		var int i, j;
-		let i = 0
+		var int i, j, adr;
+		let i = 0;
 		while(i<63){
 			let adr = (i/2) + ((32*11)*y);
-			let j = 0
+			let j = 0;
 			while(j<11){
 				let screen[adr] = -1;
 				let j = j+1;
@@ -303,6 +303,7 @@ class Output {
 			}
 			let i = i + 1;
 		}
+        return;
 	}
     /** Moves the cursor one column back. */
     function void backSpace() {
