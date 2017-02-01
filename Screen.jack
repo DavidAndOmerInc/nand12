@@ -25,7 +25,7 @@ class Screen {
     function void clearScreen() {
         var int address;
         let address = start_screen;
-        while (address < end_screen){
+        while (address < end_screen) {
             do Memory.poke(address, 0);
             let address = address + 1;
         }
@@ -41,26 +41,19 @@ class Screen {
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        var int address, value, bit, current_value;
-        if ((x < 0 | x > 511) | (y < 0 | y > 255)) {
-            do Sys.error(7);
-        }
+        var int address, temp, current_value;
         let address = (Math.mult2n(y, 5) + Math.div2n(x, 4)) + start_screen;
-        let current_value = Memory.peek(address);
-        let bit = Math.mod2n(x, 4);
-        let value = Math.get2n(bit);
         if (color) {
-            let value = value | current_value;  
+            do Memory.poke(address, Memory.peek(address) | Math.get2n(Math.mod2n(x, 4)));
         } else {
-            let value = (~value) & current_value;
+            do Memory.poke(address, Memory.peek(address) & ~Math.get2n(Math.mod2n(x, 4)));
         }
-        do Memory.poke(address, value);
         return;
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
-        var int temp, dx, dy, a, b, state, y_move, address;
+        var int temp, dx, dy, a, b, state, y_move, address, move_address;
         if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
             do Sys.error(8);
         }
@@ -78,46 +71,69 @@ class Screen {
             return;
         }
         let dy = Math.abs(y1 - y2);
+        let address = Math.mult2n(y1, 5) + Math.div2n(x1, 4) + start_screen;
         if (dy = 0) {
-            let address = Math.mult2n(y1, 5) + Math.div2n(x1, 4) + start_screen;
-            do Screen.drawHorizontalLine(x1, x2, y2, address);
+            if (color) {
+                do Screen.drawBlackHorizontalLine(x1, x2, y2, address);
+            } else {
+                do Screen.drawWhiteHorizontalLine(x1, x2, y2, address);
+            }
             return;
         }
         if (y1 > y2) {
             let y_move = -1;
+            let move_address = -32;
         } else {
             let y_move = 1;
+            let move_address = 32;
         }    
         let a = 0;
         let b = 0;
         let state = 0;
+        if (color) {
+            while (~(dx < a) & ~(dy < b)) {
+                do Memory.poke(address, Memory.peek(address) | Math.get2n(Math.mod2n(x1 + a, 4)));
+                if (state < 0) {
+                    let a = a + 1;
+                    if (Math.mod2n(x1 + a, 4) = 0) {
+                        let address = address + 1;
+                    }
+                    let state = state + dy;
+                } else {
+                    let b = b + y_move;
+                    let address = address + move_address;
+                    let state = state - dx;
+                }
+            }
+            return;
+        }
         while (~(dx < a) & ~(dy < b)) {
-            do Screen.drawPixel(x1 + a, y1 + b);
+            do Memory.poke(address, Memory.peek(address) & ~Math.get2n(Math.mod2n(x1 + a, 4)));
             if (state < 0) {
                 let a = a + 1;
+                if (Math.mod2n(x1 + a, 4) = 0) {
+                    let address = address + 1;
+                }
                 let state = state + dy;
             } else {
                 let b = b + y_move;
+                let address = address + move_address;
                 let state = state - dx;
             }
         }
-        return; 
+        return;
     }
 
-    function void drawHorizontalLine(int x1, int x2, int y, int address) {
-        var int temp, address, length;
+    function void drawBlackHorizontalLine(int x1, int x2, int y, int address) {
+        var int temp, length;
         let length = 16 - Math.mod2n(x1, 4);
         let temp = 0;
-        while (~(x1 > x2) & ~(length < 0)) {
+        while (~(x1 > x2) & length > 0) {
             let temp = temp | Math.get2n(Math.mod2n(x1, 4));
             let x1 = x1 + 1;
             let length = length - 1;
         }
-        if (color) {
-            do Memory.poke(address, Memory.peek(address) | temp);
-        } else {
-            do Memory.poke(address, Memory.peek(address) & (~temp));
-        }
+        do Memory.poke(address, Memory.peek(address) | temp);
         let address = address + 1;
         while(~(x2 - x1 < 16)) {
             do Memory.poke(address, color);
@@ -129,29 +145,55 @@ class Screen {
             let temp = temp | Math.get2n(Math.mod2n(x1, 4));
             let x1 = x1 + 1;
         }
-        if (color) {
-            do Memory.poke(address, Memory.peek(address) | temp);
-        } else {
-            do Memory.poke(address, Memory.peek(address) & (~temp));
+        do Memory.poke(address, Memory.peek(address) | temp);
+        return;
+    }
+
+    function void drawWhiteHorizontalLine(int x1, int x2, int y, int address) {
+        var int temp, length;
+        let length = 16 - Math.mod2n(x1, 4);
+        let temp = 0;
+        while (~(x1 > x2) & length > 0) {
+            let temp = temp | Math.get2n(Math.mod2n(x1, 4));
+            let x1 = x1 + 1;
+            let length = length - 1;
         }
+        do Memory.poke(address, Memory.peek(address) & (~temp));
+        let address = address + 1;
+        while(~(x2 - x1 < 16)) {
+            do Memory.poke(address, color);
+            let address = address + 1;
+            let x1 = x1 + 16;
+        }
+        let temp = 0;
+        while (~(x1 > x2)) {
+            let temp = temp | Math.get2n(Math.mod2n(x1, 4));
+            let x1 = x1 + 1;
+        }
+        do Memory.poke(address, Memory.peek(address) & (~temp));
         return;
     }
 
     function void drawVerticalLine(int x, int y1, int y2) {
-        var int temp, value, address;
+        var int temp, address;
         if (y1 > y2) {
             let temp = y1;
             let y1 = y2;
             let y2 = temp;
         }
         let address = Math.mult2n(y1, 5) + Math.div2n(x, 4) + start_screen;
-        let value = Math.get2n(Math.mod2n(x, 4));
-        while (~(y1 > y2)) {
-            if (color) {
-                do Memory.poke(address, Memory.peek(address) | value);
-            } else {
-                do Memory.poke(address, Memory.peek(address) & (~value));
+        let temp = Math.get2n(Math.mod2n(x, 4));
+        if (color) {
+            while (~(y1 > y2)) {
+                do Memory.poke(address, Memory.peek(address) | temp);
+                let address = address + 32;
+                let y1 = y1 + 1;
             }
+            return;
+        }
+        let temp = ~temp;
+        while (~(y1 > y2)) {
+            do Memory.poke(address, Memory.peek(address) & (~temp));
             let address = address + 32;
             let y1 = y1 + 1;
         }
@@ -162,12 +204,17 @@ class Screen {
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
         var int address;
-        if ((x1 < 0 | x2 > 511) | (y1 < 0 | y2 > 255)) {
-            do Sys.error(8);
-        }
         let address = Math.mult2n(y1, 5) + Math.div2n(x1, 4) + start_screen;
+        if (color) {
+            while (~(y1 > y2)) {
+                do Screen.drawBlackHorizontalLine(x1, x2, y1, address);
+                let y1 = y1 + 1;
+                let address = address + 32;
+            }
+            return;
+        }
         while (~(y1 > y2)) {
-            do Screen.drawHorizontalLine(x1, x2, y1, address);
+            do Screen.drawWhiteHorizontalLine(x1, x2, y1, address);
             let y1 = y1 + 1;
             let address = address + 32;
         }
@@ -177,30 +224,43 @@ class Screen {
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
         var int dy, square_radius, root, y_dy, square_dy, address, x_minus_r2, x_plus_r2, distance;
-        if (x < 0 | x > 511 | y < 0 | y > 255) {
-            do Sys.error(12);
-        }
-        if ((x - r < 0 | x + r > 511) | (y - r < 0 | y + r > 255)) {
-            do Sys.error(13);
-        }
-        let dy = 1;
+        let dy = 0;
+        let square_dy = 0;
         let square_radius = r * r;
         let address = Math.mult2n(y, 5) + Math.div2n((x - r), 4) + start_screen;
-        do Screen.drawHorizontalLine(x - r, x + r, y, address);
         let distance = 64;
-        while (~(dy > r)) {
+        if (color) {
+            do Screen.drawBlackHorizontalLine(x - r, x + r, y, address);
+            while (dy < r) {
+                let square_dy = square_dy + dy + dy + 1;
+                let dy = dy + 1;
+                let y_dy = y + dy;
+                let root = Math.sqrt(square_radius - square_dy);
+                let x_minus_r2 = x - root;
+                let x_plus_r2 = x + root;
+                let address = Math.mult2n(y_dy, 5) + Math.div2n(x_minus_r2, 4) + start_screen;
+                do Screen.drawBlackHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
+                let y_dy = y - dy;
+                let address = address - distance;
+                let distance = distance + 64;
+                do Screen.drawBlackHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
+            }
+            return;
+        }
+        do Screen.drawWhiteHorizontalLine(x - r, x + r, y, address);
+        while (dy < r) {
+            let square_dy = square_dy + dy + dy + 1;
+            let dy = dy + 1;
             let y_dy = y + dy;
-            let square_dy = dy * dy;
             let root = Math.sqrt(square_radius - square_dy);
             let x_minus_r2 = x - root;
             let x_plus_r2 = x + root;
             let address = Math.mult2n(y_dy, 5) + Math.div2n(x_minus_r2, 4) + start_screen;
-            do Screen.drawHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
+            do Screen.drawWhiteHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
             let y_dy = y - dy;
             let address = address - distance;
             let distance = distance + 64;
-            do Screen.drawHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
-            let dy = dy + 1;
+            do Screen.drawWhiteHorizontalLine(x_minus_r2, x_plus_r2, y_dy, address);
         }
         return;
     }
